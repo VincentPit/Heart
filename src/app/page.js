@@ -1,95 +1,54 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useRef, useEffect, useState } from 'react';
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+export default function HeartCanvas() {
+    const canvasRef = useRef(null);
+    const [drawing, setDrawing] = useState(false);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+    const drawHeart = (ctx, width, height) => {
+        let t = 0; // Time variable for animation
+        const interval = setInterval(() => {
+            if (t > Math.PI * 2) {
+                clearInterval(interval); // Stop animation after completing the heart
+                return;
+            }
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.beginPath();
+            ctx.moveTo(width / 2, height / 2);
+
+            for (let i = 0; i < t; i += 0.01) {
+                const x = 16 * Math.pow(Math.sin(i), 3);
+                const y = 13 * Math.cos(i) - 5 * Math.cos(2 * i) - 2 * Math.cos(3 * i) - Math.cos(4 * i);
+                ctx.lineTo(width / 2 + x * 10, height / 2 - y * 10);
+            }
+
+            ctx.strokeStyle = "#ff0000";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            t += 0.05; // Control the drawing speed
+        }, 30);
+    };
+
+    const handleDraw = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const { width, height } = canvas;
+        drawHeart(ctx, width, height);
+        setDrawing(true);
+    };
+
+    return (
+        <div className="flex flex-col items-center justify-center h-screen bg-pink-100">
+            <canvas ref={canvasRef} width={400} height={400} className="border border-red-300 rounded-xl shadow-md" />
+            <button
+                onClick={handleDraw}
+                className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600"
+                disabled={drawing}
+            >
+                {drawing ? "Drawing in Progress" : "Draw a Heart"}
+            </button>
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
